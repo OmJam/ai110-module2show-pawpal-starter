@@ -87,7 +87,12 @@ if pet_submitted:
         st.session_state.owner.add_pet(new_pet)
         st.success(f"**{pet_name}** added to {st.session_state.owner.first_name}'s profile!")
 
-if st.session_state.pet:
+if st.session_state.owner and st.session_state.owner.get_pets():
+    pet_names = [p.get_name() for p in st.session_state.owner.get_pets()]
+    selected_name = st.selectbox("Active pet", pet_names, key="active_pet")
+    st.session_state.pet = next(
+        p for p in st.session_state.owner.get_pets() if p.get_name() == selected_name
+    )
     p = st.session_state.pet
     st.caption(f"Active pet: **{p.get_name()}** — {p.get_breed()}, age {p.get_age()}")
 
