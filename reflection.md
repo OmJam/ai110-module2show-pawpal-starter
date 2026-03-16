@@ -23,8 +23,17 @@
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+**Tradeoff: Greedy scheduling (fast, readable) vs. optimal task packing (correct but complex)**
+
+The `create_plan` method uses a greedy algorithm: it sorts tasks by priority then shortest duration, then adds each task to the plan as long as it fits within `owner.time_available`. This is fast (O(n log n) to sort, O(n) to fit) and easy to explain to a user — "high-priority, shorter tasks go first."
+
+However, greedy scheduling does not always produce the maximum number of tasks. Consider: a 90-minute budget with one 50-minute task and two 45-minute tasks. The greedy algorithm picks the 50-minute task first (same priority), leaving only 40 minutes — neither 45-minute task fits. The optimal solution would skip the 50-minute task and schedule both 45-minute tasks instead.
+
+The true optimal solution is the 0/1 Knapsack problem, which is NP-hard. For a pet care app with 5–10 tasks, that level of complexity is unnecessary. The greedy approach is fast, predictable, and produces a good-enough plan for the real-world use case. The tradeoff is correctness for edge cases in exchange for simplicity and performance.
+
+**A second tradeoff: time conflict detection checks pending tasks only**
+
+The `detect_conflicts` method filters out completed tasks before checking for time overlaps. This prevents false warnings from recurring tasks (which clone themselves with the same `start_time`), but it means a conflict between a completed task and a pending one goes undetected. This is the right tradeoff here — a completed task is already done and can't cause a real scheduling problem.
 
 ---
 

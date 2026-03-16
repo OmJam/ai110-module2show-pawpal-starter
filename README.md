@@ -41,3 +41,44 @@ pip install -r requirements.txt
 5. Add tests to verify key behaviors.
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
+
+---
+
+## Smarter Scheduling
+
+Beyond the basic daily plan, PawPal+ includes four algorithmic improvements implemented in `pawpal_system.py`.
+
+### 1. Priority + Shortest-Job-First sorting
+
+`Scheduler.create_plan` sorts pending tasks by a two-key tuple:
+
+```
+(priority_rank, duration_minutes)
+```
+
+Tasks with the same priority are ordered shortest-first. This greedy strategy maximises the number of tasks that fit within the owner's available time budget.
+
+### 2. Chronological view — `sort_by_time`
+
+`Scheduler.sort_by_time(tasks)` returns any task list reordered by `start_time` (HH:MM). Because the format is zero-padded, plain string comparison produces correct chronological order. Tasks without a start time appear last. Used by the UI to display the schedule as a readable daily timeline.
+
+### 3. Recurring task automation — `mark_task_complete`
+
+When a recurring task (e.g. daily medication) is marked complete via `Scheduler.mark_task_complete(task, pet)`, the scheduler automatically clones it with:
+
+- `status = "pending"`
+- `due_date = base_date + timedelta(days=recurrence_days)`
+
+The owner never has to re-enter daily or weekly tasks. One-off tasks are simply marked done with no clone created.
+
+### 4. Conflict detection — `detect_conflicts`
+
+`Scheduler.detect_conflicts(owner)` runs three checks and returns plain-text warnings (never raises):
+
+| Check | What it catches |
+|---|---|
+| Budget overrun | Pending tasks that didn't fit in the time budget |
+| Duplicate types | A pet with more than one task of the same type |
+| Time overlap | Any two pending timed tasks whose windows intersect across all pets |
+
+The time-overlap check uses the interval test `s1 < s2+d2 AND s2 < s1+d1` so partial overlaps (e.g. a 60-min vet visit at 09:00 and a 45-min groom at 09:30) are caught, not just exact same-start conflicts.
