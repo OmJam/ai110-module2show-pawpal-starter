@@ -4,8 +4,8 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+- I created the Owner, Pet, Task, and Scheduler classes.
+- I came up with the initial attributes and methods for each class and asked AI for the UML diagram and to make sure it looks correct. The AI fixed some class by adding some attributes like time_avaiable for the Owner class.
 
 **b. Design changes**
 
